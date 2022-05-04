@@ -1,16 +1,21 @@
 package de.murmelmeister.worlds;
 
+import de.murmelmeister.worlds.api.config.PlayerManager;
 import de.murmelmeister.worlds.api.config.WorldManager;
+import de.murmelmeister.worlds.listeners.Listeners;
 import org.bukkit.World;
 import org.bukkit.WorldType;
-import org.bukkit.event.Listener;
 
-public class InitWorlds implements Listener {
+public class InitWorlds {
 
     private WorldManager worldManager;
+    private PlayerManager playerManager;
+    private Listeners listeners;
 
     public void init() {
         setWorldManager(new WorldManager());
+        setPlayerManager(new PlayerManager());
+        setListeners(new Listeners());
     }
 
     public void loadWorlds() {
@@ -31,5 +36,21 @@ public class InitWorlds implements Listener {
 
     public void setWorldManager(WorldManager worldManager) {
         this.worldManager = worldManager;
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
+    }
+
+    public void setPlayerManager(PlayerManager playerManager) {
+        this.playerManager = playerManager;
+    }
+
+    public Listeners getListeners() {
+        return listeners;
+    }
+
+    public void setListeners(Listeners listeners) {
+        this.listeners = listeners;
     }
 }
