@@ -1,17 +1,48 @@
 package de.murmelmeister.worlds;
 
-import org.bukkit.plugin.java.JavaPlugin;
+public final class Worlds extends Main {
 
-public final class Worlds extends JavaPlugin {
+    private static Worlds instance;
 
-    @Override
-    public void onEnable() {
-        // Plugin startup logic
-
-    }
+    private InitWorlds initWorlds;
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        initWorlds.unloadWorlds();
+        handleDisableMessage();
+    }
+
+    @Override
+    public void onEnable() {
+        init();
+        handleEnableMessage();
+    }
+
+    @Override
+    public void onLoad() {
+        setInstance(this);
+    }
+
+    @Override
+    public void init() {
+        setInitWorlds(new InitWorlds());
+        initWorlds.init();
+        initWorlds.loadWorlds();
+    }
+
+    public static Worlds getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(Worlds instance) {
+        Worlds.instance = instance;
+    }
+
+    public InitWorlds getInitWorlds() {
+        return initWorlds;
+    }
+
+    public void setInitWorlds(InitWorlds initWorlds) {
+        this.initWorlds = initWorlds;
     }
 }
