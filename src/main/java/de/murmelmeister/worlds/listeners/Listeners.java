@@ -12,6 +12,7 @@ public class Listeners implements Listener {
 
     public void registerListeners() {
         setListener(new ListenerPlayerInventory());
+        setListener(new ListenerPlayerEnderChest());
     }
 
     private void setListener(Listener listener) {
