@@ -5,3 +5,8 @@ api-version: 1.18
 authors: [ Murmelmeister ]
 description: A world system for minecraft servers.
 website: https://www.youtube.com/Murmelmeister
+
+commands:
+  worlds:
+    usage: /<command> <create|delete|tp|import> <worldName>
+    description: Manager command for worlds.

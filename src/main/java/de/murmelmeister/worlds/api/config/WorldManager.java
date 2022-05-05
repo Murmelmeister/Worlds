@@ -3,7 +3,6 @@ package de.murmelmeister.worlds.api.config;
 import de.murmelmeister.worlds.Worlds;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 
@@ -57,19 +56,28 @@ public class WorldManager {
         }
     }
 
-    public void createWorld(String worldName, World.Environment environment, WorldType worldType) {
+    public void createWorld(String worldName) {
+        createConfig();
+        if (this.instance.getServer().getWorld(worldName) != null)
+            return; // TODO: Useless?
+        WorldCreator worldCreator = new WorldCreator(worldName);
+        world = this.instance.getServer().createWorld(worldCreator);
+        setWorldOptions(worldName);
+        saveConfig();
+    }
+
+    public void createWorld(String worldName, World.Environment environment) {
         createConfig();
 
         if (this.instance.getServer().getWorld(worldName) != null)
-            loadWorld(worldName, environment, worldType);
+            loadWorld(worldName, environment);
 
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
-        worldCreator.type(worldType);
 
         world = this.instance.getServer().createWorld(worldCreator);
 
-        setWorldOptions(worldName, worldType);
+        setWorldOptions(worldName);
 
         this.getConfig().set("Worlds.List", this.getWorldList());
         this.getWorldList().add(world.getName());
@@ -77,14 +85,31 @@ public class WorldManager {
         saveConfig();
     }
 
-    public void loadWorld(String worldName, World.Environment environment, WorldType worldType) {
+    public void importWorld(String worldName) {
         if (this.instance.getServer().getWorld(worldName) == null)
-            createWorld(worldName, environment, worldType);
+            createWorld(worldName);
 
         world = this.instance.getServer().getWorld(worldName);
 
         if (!(this.getConfig().contains("Worlds.World." + worldName)))
-            setWorldOptions(worldName, worldType);
+            setWorldOptions(worldName);
+
+        if (!(this.getWorldList().contains(world.getName()))) {
+            this.getConfig().set("Worlds.List", this.getWorldList());
+            this.getWorldList().add(world.getName());
+        }
+
+        saveConfig();
+    }
+
+    public void loadWorld(String worldName, World.Environment environment) {
+        if (this.instance.getServer().getWorld(worldName) == null)
+            createWorld(worldName, environment);
+
+        world = this.instance.getServer().getWorld(worldName);
+
+        if (!(this.getConfig().contains("Worlds.World." + worldName)))
+            setWorldOptions(worldName);
 
         if (!(this.getWorldList().contains(world.getName())))
             this.getWorldList().add(world.getName());
@@ -92,22 +117,21 @@ public class WorldManager {
         saveConfig();
     }
 
-    public void unloadWorld(String worldName, World.Environment environment, WorldType worldType) {
+    public void unloadWorld(String worldName, World.Environment environment) {
         if (this.instance.getServer().getWorld(worldName) == null)
-            createWorld(worldName, environment, worldType);
+            createWorld(worldName, environment);
 
         world = this.instance.getServer().getWorld(worldName);
 
         if (!(this.getConfig().contains("Worlds.World." + worldName)))
-            setWorldOptions(worldName, worldType);
+            setWorldOptions(worldName);
 
         this.getWorldList().remove(world.getName());
     }
 
-    private void setWorldOptions(String worldName, WorldType worldType) {
+    private void setWorldOptions(String worldName) {
         this.getConfig().set("Worlds.World." + worldName + ".Name", world.getName());
         this.getConfig().set("Worlds.World." + worldName + ".Environment", world.getEnvironment().name());
-        this.getConfig().set("Worlds.World." + worldName + ".WorldType", worldType.name());
         this.getConfig().set("Worlds.World." + worldName + ".AllowAnimals", world.getAllowAnimals());
         this.getConfig().set("Worlds.World." + worldName + ".AllowMonsters", world.getAllowMonsters());
         this.getConfig().set("Worlds.World." + worldName + ".Difficulty", world.getDifficulty().name());

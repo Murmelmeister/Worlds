@@ -29,6 +29,7 @@ public final class Worlds extends Main {
         initWorlds.init();
         initWorlds.loadWorlds();
         initWorlds.getListeners().registerListeners();
+        initWorlds.getCommandManager().registerCommands();
     }
 
     public static Worlds getInstance() {
