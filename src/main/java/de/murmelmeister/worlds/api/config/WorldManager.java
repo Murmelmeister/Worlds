@@ -85,6 +85,34 @@ public class WorldManager {
         saveConfig();
     }
 
+    public void deleteWorld(String worldName) {
+        World world = this.instance.getServer().getWorld(worldName);
+        if (world == null) return;
+        File worldFile = world.getWorldFolder();
+        deleteFile(worldFile); // Is little buggy
+        this.instance.getServer().getWorlds().remove(world);
+        this.getWorldList().remove(world.getName());
+        this.getConfig().set("Worlds.List", this.getWorldList());
+        this.getConfig().set("Worlds.World." + worldName, null);
+        this.saveConfig();
+    }
+
+    private boolean deleteFile(File file) {
+        if (file.exists()) {
+            File[] files = file.listFiles();
+            if (files == null) return false;
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteFile(files[i]);
+                } else {
+                    boolean aBoolean = files[i].delete();
+                    if (!(aBoolean)) logger.warn("Could not delete the same files.");
+                }
+            }
+        }
+        return file.delete();
+    }
+
     public void importWorld(String worldName) {
         if (this.instance.getServer().getWorld(worldName) == null)
             createWorld(worldName);
