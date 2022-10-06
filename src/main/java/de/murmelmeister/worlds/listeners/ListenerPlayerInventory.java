@@ -1,5 +1,6 @@
 package de.murmelmeister.worlds.listeners;
 
+import de.murmelmeister.worlds.InitPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -7,16 +8,20 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ListenerPlayerInventory extends Listeners {
 
+    public ListenerPlayerInventory(InitPlugin init) {
+        super(init);
+    }
+
     @EventHandler(priority = EventPriority.HIGH)
     public void handlePlayerJoin(PlayerJoinEvent event) {
-        if (!(this.playerManager.hasAccount(event.getPlayer().getUniqueId())))
-            this.playerManager.createNewAccount(event.getPlayer().getUniqueId());
-        this.playerManager.loadInventory(event.getPlayer().getUniqueId());
+        if (!(getInit().getPlayerManager().hasAccount(event.getPlayer().getUniqueId())))
+            getInit().getPlayerManager().createNewAccount(event.getPlayer().getUniqueId());
+        getInit().getPlayerManager().loadInventory(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handlePlayerQuit(PlayerQuitEvent event) {
-        this.playerManager.saveInventory(event.getPlayer().getUniqueId());
+        getInit().getPlayerManager().saveInventory(event.getPlayer().getUniqueId());
     }
 
 }

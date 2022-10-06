@@ -1,10 +1,9 @@
 package de.murmelmeister.worlds.api.config;
 
-import de.murmelmeister.worlds.Worlds;
+import de.murmelmeister.worlds.InitPlugin;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,25 +13,30 @@ import java.util.UUID;
 
 public class PlayerManager {
 
-    private final File folder = new File("plugins//Worlds//PlayerManager//");
+    private InitPlugin init;
+
+    private File folder;
     private File file;
     private YamlConfiguration config;
 
-    private final Logger logger = Worlds.getInstance().getSLF4JLogger();
-    private final Worlds instance = Worlds.getInstance();
+    public PlayerManager(InitPlugin init) {
+        setInit(init);
+    }
 
     public void createConfig(UUID uuid) {
+        String fileName = uuid + ".yml";
+        setFolder(new File(String.format("plugins//%s//PlayerManager", getInit().getInstance().getPluginName())));
         if (!(getFolder().exists())) {
             boolean aBoolean = getFolder().mkdir();
-            if (!(aBoolean)) logger.warn("Could not create the same folder.");
+            if (!(aBoolean))
+                getInit().getInstance().getSLF4JLogger().warn("The plugin can not create a second folder.");
         }
-
-        setFile(new File(getFolder(), uuid + ".yml"));
-
-        if (!(file.exists())) {
+        setFile(new File(getFolder(), fileName));
+        if (!(getFile().exists())) {
             try {
-                boolean aBoolean = file.createNewFile();
-                if (!(aBoolean)) logger.warn(String.format("Could not create the same %s.yml.", uuid));
+                boolean aBoolean = getFile().createNewFile();
+                if (!(aBoolean))
+                    getInit().getInstance().getSLF4JLogger().warn(String.format("The plugin can not create the file '%s'.", fileName));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -62,7 +66,7 @@ public class PlayerManager {
     @SuppressWarnings("unchecked")
     public void loadEnderChest(UUID uuid) {
         createConfig(uuid);
-        Player player = this.instance.getServer().getPlayer(uuid);
+        Player player = getInit().getInstance().getServer().getPlayer(uuid);
         if (player == null) return;
         player.getEnderChest().setContents(((List<ItemStack>) Objects.requireNonNull(this.getConfig().get("EnderChest.Contents"))).toArray(ItemStack[]::new));
         player.getEnderChest().setStorageContents(((List<ItemStack>) Objects.requireNonNull(this.getConfig().get("EnderChest.StorageContents"))).toArray(ItemStack[]::new));
@@ -75,7 +79,7 @@ public class PlayerManager {
     @SuppressWarnings("unchecked")
     public void loadInventory(UUID uuid) {
         createConfig(uuid);
-        Player player = this.instance.getServer().getPlayer(uuid);
+        Player player = getInit().getInstance().getServer().getPlayer(uuid);
         if (player == null) return;
         player.getInventory().setArmorContents(((List<ItemStack>) Objects.requireNonNull(this.getConfig().get("Inventory.ArmorContents"))).toArray(ItemStack[]::new));
         player.getInventory().setContents(((List<ItemStack>) Objects.requireNonNull(this.getConfig().get("Inventory.Contents"))).toArray(ItemStack[]::new));
@@ -89,7 +93,7 @@ public class PlayerManager {
 
     private void setEnderChestConfig(UUID uuid) {
         createConfig(uuid);
-        Player player = this.instance.getServer().getPlayer(uuid);
+        Player player = getInit().getInstance().getServer().getPlayer(uuid);
         if (player == null) return;
         this.getConfig().set("EnderChest.Contents", player.getEnderChest().getContents());
         this.getConfig().set("EnderChest.StorageContents", player.getEnderChest().getStorageContents());
@@ -98,7 +102,7 @@ public class PlayerManager {
 
     private void setInventoryConfig(UUID uuid) {
         createConfig(uuid);
-        Player player = this.instance.getServer().getPlayer(uuid);
+        Player player = getInit().getInstance().getServer().getPlayer(uuid);
         if (player == null) return;
         this.getConfig().set("Inventory.ArmorContents", player.getInventory().getArmorContents());
         this.getConfig().set("Inventory.Contents", player.getInventory().getContents());
@@ -107,8 +111,20 @@ public class PlayerManager {
         saveConfig();
     }
 
+    public InitPlugin getInit() {
+        return init;
+    }
+
+    public void setInit(InitPlugin init) {
+        this.init = init;
+    }
+
     public File getFolder() {
         return folder;
+    }
+
+    public void setFolder(File folder) {
+        this.folder = folder;
     }
 
     public File getFile() {
@@ -126,5 +142,4 @@ public class PlayerManager {
     public void setConfig(YamlConfiguration config) {
         this.config = config;
     }
-
 }

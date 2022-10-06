@@ -1,18 +1,32 @@
 package de.murmelmeister.worlds.commands;
 
-import de.murmelmeister.worlds.Worlds;
-import de.murmelmeister.worlds.api.config.WorldManager;
-import org.bukkit.command.CommandSender;
+import de.murmelmeister.worlds.InitPlugin;
 import org.bukkit.command.TabExecutor;
 
-public abstract class Commands implements TabExecutor {
+import java.util.Objects;
 
-    protected Worlds instance = Worlds.getInstance();
+public class Commands {
 
-    protected WorldManager worldManager = this.instance.getInitWorlds().getWorldManager();
+    private InitPlugin init;
 
-    protected void setSendMessage(CommandSender sender, String message) {
-        sender.sendMessage(this.instance.getPrefix() + message);
+    public Commands(InitPlugin init) {
+        setInit(init);
     }
 
+    public void registerCommands() {
+        addCommand("worlds", new CommandWorlds(getInit()));
+    }
+
+    private void addCommand(String name, TabExecutor executor) {
+        Objects.requireNonNull(getInit().getInstance().getCommand(name)).setExecutor(executor);
+        Objects.requireNonNull(getInit().getInstance().getCommand(name)).setTabCompleter(executor);
+    }
+
+    public InitPlugin getInit() {
+        return init;
+    }
+
+    public void setInit(InitPlugin init) {
+        this.init = init;
+    }
 }

@@ -1,22 +1,30 @@
 package de.murmelmeister.worlds.listeners;
 
-import de.murmelmeister.worlds.Worlds;
-import de.murmelmeister.worlds.api.config.PlayerManager;
+import de.murmelmeister.worlds.InitPlugin;
 import org.bukkit.event.Listener;
 
 public class Listeners implements Listener {
 
-    protected Worlds instance = Worlds.getInstance();
+    private InitPlugin init;
 
-    protected PlayerManager playerManager = this.instance.getInitWorlds().getPlayerManager();
+    public Listeners(InitPlugin init) {
+        setInit(init);
+    }
 
     public void registerListeners() {
-        setListener(new ListenerPlayerInventory());
-        setListener(new ListenerPlayerEnderChest());
+        setListener(new ListenerPlayerInventory(getInit()));
+        setListener(new ListenerPlayerEnderChest(getInit()));
     }
 
     private void setListener(Listener listener) {
-        this.instance.getServer().getPluginManager().registerEvents(listener, this.instance);
+        getInit().getInstance().getServer().getPluginManager().registerEvents(listener, getInit().getInstance());
     }
 
+    public InitPlugin getInit() {
+        return init;
+    }
+
+    public void setInit(InitPlugin init) {
+        this.init = init;
+    }
 }

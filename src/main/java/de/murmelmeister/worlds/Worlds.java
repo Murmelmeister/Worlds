@@ -2,49 +2,28 @@ package de.murmelmeister.worlds;
 
 public final class Worlds extends Main {
 
-    private static Worlds instance;
-
-    private InitWorlds initWorlds;
+    private InitPlugin init;
 
     @Override
     public void onDisable() {
-        initWorlds.unloadWorlds();
-        handleDisableMessage();
+        getInit().onDisable();
     }
 
     @Override
     public void onEnable() {
-        init();
-        handleEnableMessage();
+        getInit().onEnable();
     }
 
     @Override
     public void onLoad() {
-        setInstance(this);
+        setInit(new InitPlugin(this));
     }
 
-    @Override
-    public void init() {
-        setInitWorlds(new InitWorlds());
-        initWorlds.init();
-        initWorlds.loadWorlds();
-        initWorlds.getListeners().registerListeners();
-        initWorlds.getCommandManager().registerCommands();
+    public InitPlugin getInit() {
+        return init;
     }
 
-    public static Worlds getInstance() {
-        return instance;
-    }
-
-    public static void setInstance(Worlds instance) {
-        Worlds.instance = instance;
-    }
-
-    public InitWorlds getInitWorlds() {
-        return initWorlds;
-    }
-
-    public void setInitWorlds(InitWorlds initWorlds) {
-        this.initWorlds = initWorlds;
+    public void setInit(InitPlugin init) {
+        this.init = init;
     }
 }

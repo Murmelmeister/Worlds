@@ -1,10 +1,9 @@
 package de.murmelmeister.worlds.api.config;
 
-import de.murmelmeister.worlds.Worlds;
+import de.murmelmeister.worlds.InitPlugin;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,39 +12,41 @@ import java.util.List;
 
 public class WorldManager {
 
-    private final File folder = new File("plugins//Worlds//");
+    private InitPlugin init;
+
+    private File folder;
     private File file;
     private YamlConfiguration config;
-
-    private final Logger logger = Worlds.getInstance().getSLF4JLogger();
-    private final Worlds instance = Worlds.getInstance();
 
     private List<String> worldList; // TODO: Set the default world in this list
     private World world;
 
-    public WorldManager() {
+    public WorldManager(InitPlugin init) {
+        setInit(init);
+        setWorldList(new ArrayList<>());
         createConfig();
         saveConfig();
-        setWorldList(new ArrayList<>());
     }
 
     public void createConfig() {
+        String fileName = "worlds.yml";
+        setFolder(new File(String.format("plugins//%s//", getInit().getInstance().getPluginName())));
         if (!(getFolder().exists())) {
             boolean aBoolean = getFolder().mkdir();
-            if (!(aBoolean)) logger.warn("Could not create the same folder.");
+            if (!(aBoolean))
+                getInit().getInstance().getSLF4JLogger().warn("The plugin can not create a second folder.");
         }
-
-        setFile(new File(getFolder(), "worlds.yml"));
-
-        if (!(file.exists())) {
+        setFile(new File(getFolder(), fileName));
+        if (!(getFile().exists())) {
             try {
-                boolean aBoolean = file.createNewFile();
-                if (!(aBoolean)) logger.warn("Could not create the same worlds.yml.");
+                boolean aBoolean = getFile().createNewFile();
+                if (!(aBoolean))
+                    getInit().getInstance().getSLF4JLogger().warn(String.format("The plugin can not create the file '%s'.", fileName));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        setConfig(YamlConfiguration.loadConfiguration(file));
+        setConfig(YamlConfiguration.loadConfiguration(getFile()));
     }
 
     public void saveConfig() {
@@ -57,25 +58,25 @@ public class WorldManager {
     }
 
     public void createWorld(String worldName) {
-        createConfig();
-        if (this.instance.getServer().getWorld(worldName) != null)
+        createConfig(); // TODO: Useless?
+        if (getInit().getInstance().getServer().getWorld(worldName) != null)
             return; // TODO: Useless?
         WorldCreator worldCreator = new WorldCreator(worldName);
-        world = this.instance.getServer().createWorld(worldCreator);
+        world = getInit().getInstance().getServer().createWorld(worldCreator);
         setWorldOptions(worldName);
         saveConfig();
     }
 
     public void createWorld(String worldName, World.Environment environment) {
-        createConfig();
+        createConfig(); // TODO: Useless?
 
-        if (this.instance.getServer().getWorld(worldName) != null)
+        if (getInit().getInstance().getServer().getWorld(worldName) != null)
             loadWorld(worldName, environment);
 
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
 
-        world = this.instance.getServer().createWorld(worldCreator); // Error?
+        world = getInit().getInstance().getServer().createWorld(worldCreator); // TODO: Error?
 
         setWorldOptions(worldName);
 
@@ -86,11 +87,11 @@ public class WorldManager {
     }
 
     public void deleteWorld(String worldName) {
-        World world = this.instance.getServer().getWorld(worldName);
+        World world = getInit().getInstance().getServer().getWorld(worldName);
         if (world == null) return;
         File worldFile = world.getWorldFolder();
-        this.instance.getServer().unloadWorld(world, false);
-        this.instance.getServer().getWorlds().remove(world); // TODO: Useless?
+        getInit().getInstance().getServer().unloadWorld(world, false);
+        getInit().getInstance().getServer().getWorlds().remove(world); // TODO: Useless?
         deleteFile(worldFile);
         this.getWorldList().remove(world.getName());
         this.getConfig().set("Worlds.List", this.getWorldList());
@@ -108,7 +109,7 @@ public class WorldManager {
                     deleteFile(files[i]);
                 } else {
                     boolean aBoolean = files[i].delete();
-                    if (!(aBoolean)) logger.warn("Could not delete the same files.");
+                    if (!(aBoolean)) getInit().getInstance().getSLF4JLogger().warn("Could not delete the same files.");
                 }
             }
         }
@@ -116,10 +117,10 @@ public class WorldManager {
     }
 
     public void importWorld(String worldName) {
-        if (this.instance.getServer().getWorld(worldName) == null)
+        if (getInit().getInstance().getServer().getWorld(worldName) == null)
             createWorld(worldName);
 
-        world = this.instance.getServer().getWorld(worldName);
+        world = getInit().getInstance().getServer().getWorld(worldName);
 
         if (!(this.getConfig().contains("Worlds.World." + worldName)))
             setWorldOptions(worldName);
@@ -133,10 +134,10 @@ public class WorldManager {
     }
 
     public void loadWorld(String worldName, World.Environment environment) {
-        if (this.instance.getServer().getWorld(worldName) == null)
+        if (getInit().getInstance().getServer().getWorld(worldName) == null)
             createWorld(worldName, environment);
 
-        world = this.instance.getServer().getWorld(worldName);
+        world = getInit().getInstance().getServer().getWorld(worldName);
 
         if (!(this.getConfig().contains("Worlds.World." + worldName)))
             setWorldOptions(worldName);
@@ -148,10 +149,10 @@ public class WorldManager {
     }
 
     public void unloadWorld(String worldName, World.Environment environment) {
-        if (this.instance.getServer().getWorld(worldName) == null)
+        if (getInit().getInstance().getServer().getWorld(worldName) == null)
             createWorld(worldName, environment);
 
-        world = this.instance.getServer().getWorld(worldName);
+        world = getInit().getInstance().getServer().getWorld(worldName);
 
         if (!(this.getConfig().contains("Worlds.World." + worldName)))
             setWorldOptions(worldName);
@@ -169,8 +170,32 @@ public class WorldManager {
         saveConfig();
     }
 
+    public void loadWorlds() {
+        for (String worldName : getConfig().getStringList("Worlds.List")) {
+            loadWorld(worldName, World.Environment.NORMAL);
+        }
+    }
+
+    public void unloadWorlds() {
+        for (String worldName : getConfig().getStringList("Worlds.List")) {
+            unloadWorld(worldName, World.Environment.NORMAL);
+        }
+    }
+
+    public InitPlugin getInit() {
+        return init;
+    }
+
+    public void setInit(InitPlugin init) {
+        this.init = init;
+    }
+
     public File getFolder() {
         return folder;
+    }
+
+    public void setFolder(File folder) {
+        this.folder = folder;
     }
 
     public File getFile() {
