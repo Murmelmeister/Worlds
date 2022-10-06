@@ -28,6 +28,7 @@ public class CommandWorlds extends Commands {
 
         if (args.length == 0 || args.length == 1 || (args.length == 2 && (args[0].equalsIgnoreCase("create")))) {
             setSendMessage(sender, "§7Syntax: §c/worlds <create | delete | tp | import> <worldName>");
+            //setSendMessage(sender, sender.getServer().getWorlds().toString()); // Test-Code
         } else if (args.length <= 3) {
 
             if (args[0].equalsIgnoreCase("create")) {
@@ -80,7 +81,12 @@ public class CommandWorlds extends Commands {
 
                 Player player = sender instanceof Player ? (Player) sender : null;
 
-                if (player == null) return true; // Player can not be null
+                if (player == null) {
+                    this.worldManager.deleteWorld(worldName);
+                    setSendMessage(sender, String.format("§7The world §e%s §7was§a deleted§7.", worldName));
+                    return true;
+                }
+
                 if (player.getWorld().equals(world))
                     player.kick(Component.text("§cThe world will be deleted.").append(Component.text(" §cRejoin the server, please.")));
 

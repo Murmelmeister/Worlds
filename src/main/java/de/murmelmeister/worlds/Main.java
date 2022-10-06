@@ -23,7 +23,7 @@ public abstract class Main extends JavaPlugin {
     }
 
     public String getVersion() {
-        return "a1.0.0";
+        return "0.0.1-ALPHA-SNAPSHOT";
     }
 
     public String getAuthor() {

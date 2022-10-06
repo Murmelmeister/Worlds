@@ -6,7 +6,7 @@
 
     <groupId>de.murmelmeister</groupId>
     <artifactId>Worlds</artifactId>
-    <version>1.0.0-ALPHA</version>
+    <version>0.0.1-ALPHA-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Worlds</name>
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.18.2-R0.1-SNAPSHOT</version>
+            <version>1.19.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -20,7 +20,7 @@ public class WorldManager {
     private final Logger logger = Worlds.getInstance().getSLF4JLogger();
     private final Worlds instance = Worlds.getInstance();
 
-    private List<String> worldList;
+    private List<String> worldList; // TODO: Set the default world in this list
     private World world;
 
     public WorldManager() {
@@ -75,7 +75,7 @@ public class WorldManager {
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
 
-        world = this.instance.getServer().createWorld(worldCreator);
+        world = this.instance.getServer().createWorld(worldCreator); // Error?
 
         setWorldOptions(worldName);
 
@@ -89,18 +89,20 @@ public class WorldManager {
         World world = this.instance.getServer().getWorld(worldName);
         if (world == null) return;
         File worldFile = world.getWorldFolder();
-        deleteFile(worldFile); // Is little buggy
-        this.instance.getServer().getWorlds().remove(world);
+        this.instance.getServer().unloadWorld(world, false);
+        this.instance.getServer().getWorlds().remove(world); // TODO: Useless?
+        deleteFile(worldFile);
         this.getWorldList().remove(world.getName());
         this.getConfig().set("Worlds.List", this.getWorldList());
         this.getConfig().set("Worlds.World." + worldName, null);
         this.saveConfig();
     }
 
-    private boolean deleteFile(File file) {
+    private boolean deleteFile(File file) { // I don't know if it needs a boolean
         if (file.exists()) {
             File[] files = file.listFiles();
             if (files == null) return false;
+            // I don't know if it needs for-loop
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isDirectory()) {
                     deleteFile(files[i]);
