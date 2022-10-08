@@ -11,11 +11,11 @@ public abstract class Main extends JavaPlugin {
     public abstract void onLoad();
 
     public void handleDisableMessage() {
-        getServer().getConsoleSender().sendMessage(String.format("§3%s §c» §7Plugin is§c disable§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
+        getServer().getConsoleSender().sendMessage(String.format("§3%s §c» §7Plugin is§c disabled§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
     }
 
     public void handleEnableMessage() {
-        getServer().getConsoleSender().sendMessage(String.format("§3%s §a» §7Plugin is§a enable§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
+        getServer().getConsoleSender().sendMessage(String.format("§3%s §a» §7Plugin is§a enabled§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
     }
 
     public String getAuthor() {
