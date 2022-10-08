@@ -14,8 +14,7 @@ public class ListenerPlayerInventory extends Listeners {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handlePlayerJoin(PlayerJoinEvent event) {
-        if (!(getInit().getPlayerManager().hasAccount(event.getPlayer().getUniqueId())))
-            getInit().getPlayerManager().createNewAccount(event.getPlayer().getUniqueId());
+        getInit().getPlayerManager().createAccount(event.getPlayer().getUniqueId());
         getInit().getPlayerManager().loadInventory(event.getPlayer().getUniqueId());
     }
 

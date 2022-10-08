@@ -52,15 +52,9 @@ public class PlayerManager {
         }
     }
 
-    public boolean hasAccount(UUID uuid) {
-        createConfig(uuid);
-        return (this.getConfig().getString("Inventory") != null)
-                && (this.getConfig().getString("EnderChest") != null);
-    }
-
-    public void createNewAccount(UUID uuid) {
-        setInventoryConfig(uuid);
-        setEnderChestConfig(uuid);
+    public void createAccount(UUID uuid) {
+        if (this.getConfig().getString("Inventory") == null) setInventoryConfig(uuid);
+        if (this.getConfig().getString("EnderChest") == null) setEnderChestConfig(uuid);
     }
 
     @SuppressWarnings("unchecked")

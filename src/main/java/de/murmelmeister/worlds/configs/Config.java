@@ -68,6 +68,10 @@ public class Config {
         return getConfig().get(configs.getPath());
     }
 
+    public boolean isConfigValue(Configs configs) {
+        return getConfig().getBoolean(configs.getPath());
+    }
+
     public InitPlugin getInit() {
         return init;
     }
