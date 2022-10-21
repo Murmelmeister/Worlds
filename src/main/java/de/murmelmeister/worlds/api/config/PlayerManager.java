@@ -53,8 +53,10 @@ public class PlayerManager {
     }
 
     public void createAccount(UUID uuid) {
+        createConfig(uuid);
         if (this.getConfig().getString("Inventory") == null) setInventoryConfig(uuid);
         if (this.getConfig().getString("EnderChest") == null) setEnderChestConfig(uuid);
+        saveConfig();
     }
 
     @SuppressWarnings("unchecked")

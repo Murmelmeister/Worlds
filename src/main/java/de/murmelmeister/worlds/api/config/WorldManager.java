@@ -19,7 +19,7 @@ public class WorldManager {
     private File file;
     private YamlConfiguration config;
 
-    private List<String> worldList; // TODO: Set the default world in this list
+    private List<String> worldList;
     private World world;
 
     public WorldManager(InitPlugin init) {
@@ -58,6 +58,17 @@ public class WorldManager {
         }
     }
 
+    public void loadDefaultWorlds() {
+        for (World worlds : getInit().getInstance().getServer().getWorlds()) {
+            if (getConfigPath("Worlds.World." + worlds.getName()) != null) return;
+            setWorld(worlds);
+            setWorldOptions(worlds.getName());
+            this.getWorldList().add(getWorld().getName());
+            updateWorldList(this.getWorldList());
+            saveConfig();
+        }
+    }
+
     public void createWorld(String worldName) {
         if (getInit().getInstance().getServer().getWorld(worldName) != null)
             return;
@@ -72,10 +83,10 @@ public class WorldManager {
             loadWorld(worldName, environment);
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
-        setWorld(worldCreator.createWorld()); // TODO: Error with Chunks <- I don't know why
+        setWorld(worldCreator.createWorld()); // TODO: If environment is "normal" then send the console a chunks error <- but I don't know why
         setWorldOptions(worldName);
-        updateWorldList(this.getWorldList());
         this.getWorldList().add(getWorld().getName());
+        updateWorldList(this.getWorldList());
         saveConfig();
     }
 
@@ -108,15 +119,13 @@ public class WorldManager {
     }
 
     public void importWorld(String worldName) {
-        if (getInit().getInstance().getServer().getWorld(worldName) == null) {
-            createWorld(worldName); // TODO: Fix the create a new world
-            getInit().getInstance().getSLF4JLogger().warn("Create World...");
-        }
+        if (getInit().getInstance().getServer().getWorld(worldName) == null)
+            createWorld(worldName);
         setWorld(getInit().getInstance().getServer().getWorld(worldName));
         setWorldOptions(worldName);
         if (!(this.getWorldList().contains(getWorld().getName()))) {
-            updateWorldList(this.getWorldList());
             this.getWorldList().add(getWorld().getName());
+            updateWorldList(this.getWorldList());
         }
         saveConfig();
     }
@@ -141,40 +150,29 @@ public class WorldManager {
 
     private void setWorldOptions(String worldName) {
         String path = "Worlds.World." + worldName;
-        if (getConfigPath(path + ".Name") == null) {
-            setConfigValue(path + ".Name", getWorld().getName());
-        }
-        if (getConfigPath(path + ".Environment") == null) {
-            setConfigValue(path + ".Environment", getWorld().getEnvironment().name());
-        }
-        if (getConfigPath(path + ".AllowAnimals") == null) {
-            setConfigValue(path + ".AllowAnimals", getWorld().getAllowAnimals());
-        }
-        if (getConfigPath(path + ".AllowMonsters") == null) {
-            setConfigValue(path + ".AllowMonsters", getWorld().getAllowMonsters());
-        }
-        if (getConfigPath(path + ".Difficulty") == null) {
-            setConfigValue(path + ".Difficulty", getWorld().getDifficulty().name());
-        }
-        if (getConfigPath(path + ".PVP") == null) {
-            setConfigValue(path + ".PVP", getWorld().getPVP());
-        }
+        setWorldOption(path + ".Name", getWorld().getName());
+        setWorldOption(path + ".Environment", getWorld().getEnvironment().name());
+        setWorldOption(path + ".AllowAnimals", getWorld().getAllowAnimals());
+        setWorldOption(path + ".AllowMonsters", getWorld().getAllowMonsters());
+        setWorldOption(path + ".Difficulty", getWorld().getDifficulty().name());
+        setWorldOption(path + ".PVP", getWorld().getPVP());
         for (GameRule<?> gameRule : GameRule.values())
-            if (getConfigPath(path + ".GameRules." + gameRule.getName()) == null)
-                setConfigValue(path + ".GameRules." + gameRule.getName(), getWorld().getGameRuleValue(gameRule));
+            setWorldOption(path + ".GameRules." + gameRule.getName(), getWorld().getGameRuleValue(gameRule));
         saveConfig();
     }
 
+    private void setWorldOption(String path, Object value) {
+        if (getConfigPath(path) == null) setConfigValue(path, value);
+    }
+
     public void loadWorlds() {
-        for (String worldName : getConfig().getStringList("Worlds.List")) {
+        for (String worldName : getConfig().getStringList("Worlds.List"))
             loadWorld(worldName, World.Environment.NORMAL);
-        }
     }
 
     public void unloadWorlds() {
-        for (String worldName : getConfig().getStringList("Worlds.List")) {
+        for (String worldName : getConfig().getStringList("Worlds.List"))
             unloadWorld(worldName, World.Environment.NORMAL);
-        }
     }
 
     private void updateWorldList(List<String> worldList) {

@@ -33,6 +33,7 @@ public class InitPlugin {
 
     public void onEnable() {
         init();
+        getWorldManager().loadDefaultWorlds();
         getWorldManager().loadWorlds();
         getListeners().registerListeners();
         getCommands().registerCommands();
