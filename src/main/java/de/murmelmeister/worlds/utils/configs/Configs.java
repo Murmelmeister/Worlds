@@ -6,7 +6,8 @@ public enum Configs {
     COMMANDS_WORLDS_CREATE("Commands.Worlds.Create", true),
     COMMANDS_WORLDS_DELETE("Commands.Worlds.Delete", true),
     COMMANDS_WORLDS_TELEPORT("Commands.Worlds.Teleport", true),
-    COMMANDS_WORLDS_IMPORT("Commands.Worlds.Import", true);
+    COMMANDS_WORLDS_IMPORT("Commands.Worlds.Import", true),
+    COMMANDS_WORLDS_GAMERULE("Commands.Worlds.GameRule", true);
 
     private String path;
     private Object value;

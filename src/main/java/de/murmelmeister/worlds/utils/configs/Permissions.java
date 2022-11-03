@@ -6,7 +6,8 @@ public enum Permissions {
     COMMANDS_WORLDS_CREATE("Commands.Worlds.Create", "worlds.command.worlds.create"),
     COMMANDS_WORLDS_DELETE("Commands.Worlds.Delete", "worlds.command.worlds.delete"),
     COMMANDS_WORLDS_TELEPORT("Commands.Worlds.Teleport", "worlds.command.worlds.teleport"),
-    COMMANDS_WORLDS_IMPORT("Commands.Worlds.Import", "worlds.command.worlds.import");
+    COMMANDS_WORLDS_IMPORT("Commands.Worlds.Import", "worlds.command.worlds.import"),
+    COMMANDS_WORLDS_GAMERULE("Commands.Worlds.GameRule", "worlds.command.worlds.gamerule");
 
     private String path;
     private String value;

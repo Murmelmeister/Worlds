@@ -180,11 +180,11 @@ public class WorldManager {
         setConfigValue(path, worldList);
     }
 
-    private void setConfigValue(String path, Object value) {
+    public void setConfigValue(String path, Object value) {
         getConfig().set(path, value);
     }
 
-    private String getConfigPath(String path) {
+    public String getConfigPath(String path) {
         return getConfig().getString(path);
     }
 
