@@ -1,32 +1,67 @@
 package de.murmelmeister.worlds;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import de.murmelmeister.worlds.api.WorldID;
+import de.murmelmeister.worlds.api.WorldManager;
+import de.murmelmeister.worlds.command.Commands;
+import de.murmelmeister.worlds.configs.DefaultConfig;
+import de.murmelmeister.worlds.configs.MessageConfig;
+import de.murmelmeister.worlds.listener.Listeners;
+import de.murmelmeister.worlds.utils.InfoUtil;
 
-public abstract class Main extends JavaPlugin {
+public class Main {
+    private final Worlds instance;
 
-    public abstract void onDisable();
+    private final DefaultConfig defaultConfig;
+    private final MessageConfig messageConfig;
+    private final WorldID worldID;
+    private final WorldManager worldManager;
 
-    public abstract void onEnable();
+    private final Listeners listeners;
+    private final Commands commands;
 
-    public abstract void onLoad();
-
-    public void handleDisableMessage() {
-        getServer().getConsoleSender().sendMessage(String.format("§3%s §c» §7Plugin is§c disabled§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
+    public Main(Worlds instance) {
+        this.instance = instance;
+        this.defaultConfig = new DefaultConfig(this);
+        this.messageConfig = new MessageConfig(this);
+        this.worldID = new WorldID(this);
+        this.worldManager = new WorldManager(this);
+        this.listeners = new Listeners(this);
+        this.commands = new Commands(this);
     }
 
-    public void handleEnableMessage() {
-        getServer().getConsoleSender().sendMessage(String.format("§3%s §a» §7Plugin is§a enabled§7! §7Version: §b%s §7by §b%s", getPluginName(), getVersion(), getAuthor()));
+    public void disable() {
+        worldManager.unloadWorlds();
+        InfoUtil.disableMessage(instance.getServer());
     }
 
-    public String getAuthor() {
-        return "Murmelmeister";
+    public void enable() {
+        defaultConfig.register();
+        messageConfig.register();
+        worldID.loadListID();
+        worldManager.loadDefaultWorlds();
+        worldManager.loadWorlds();
+        listeners.register();
+        commands.register();
+        InfoUtil.enableMessage(instance.getServer());
     }
 
-    public String getVersion() {
-        return "0.0.1-ALPHA-SNAPSHOT";
+    public Worlds getInstance() {
+        return instance;
     }
 
-    public String getPluginName() {
-        return "Worlds";
+    public DefaultConfig getDefaultConfig() {
+        return defaultConfig;
+    }
+
+    public MessageConfig getMessageConfig() {
+        return messageConfig;
+    }
+
+    public WorldID getWorldID() {
+        return worldID;
+    }
+
+    public WorldManager getWorldManager() {
+        return worldManager;
     }
 }

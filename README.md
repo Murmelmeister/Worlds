@@ -1,5 +1,5 @@
 # Worlds
-A world system plugin for minecraft paper servers.
+A world system plugin for Minecraft Paper servers.
 
-Paper version: 1.19.2
+Paper version: 1.19.3
 Java version: 17

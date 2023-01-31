@@ -1,29 +1,22 @@
 package de.murmelmeister.worlds;
 
-public final class Worlds extends Main {
+import org.bukkit.plugin.java.JavaPlugin;
 
-    private InitPlugin init;
+public final class Worlds extends JavaPlugin {
+    private Main main;
+
+    @Override
+    public void onLoad() {
+        this.main = new Main(this);
+    }
 
     @Override
     public void onDisable() {
-        getInit().onDisable();
+        main.disable();
     }
 
     @Override
     public void onEnable() {
-        getInit().onEnable();
-    }
-
-    @Override
-    public void onLoad() {
-        setInit(new InitPlugin(this));
-    }
-
-    public InitPlugin getInit() {
-        return init;
-    }
-
-    public void setInit(InitPlugin init) {
-        this.init = init;
+        main.enable();
     }
 }

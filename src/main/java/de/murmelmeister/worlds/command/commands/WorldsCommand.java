@@ -1,9 +1,9 @@
-package de.murmelmeister.worlds.commands;
+package de.murmelmeister.worlds.command.commands;
 
-import de.murmelmeister.worlds.InitPlugin;
+import de.murmelmeister.worlds.Main;
+import de.murmelmeister.worlds.command.CommandManager;
 import de.murmelmeister.worlds.utils.configs.Configs;
 import de.murmelmeister.worlds.utils.configs.Messages;
-import de.murmelmeister.worlds.utils.configs.Permissions;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameRule;
 import org.bukkit.World;
@@ -17,20 +17,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandWorlds extends CommandManager {
-    public CommandWorlds(InitPlugin init) {
-        super(init);
+public class WorldsCommand extends CommandManager {
+    public WorldsCommand(Main main) {
+        super(main);
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_COMMAND))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_COMMAND))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return true;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_COMMAND)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_COMMAND)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return true;
         }
 
@@ -43,7 +43,7 @@ public class CommandWorlds extends CommandManager {
          */
 
         if (args.length == 0 || (args.length == 1 && !args[0].equalsIgnoreCase("test")) || (args.length == 2 && (args[0].equalsIgnoreCase("create")))) { // TODO: Gives args errors?
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SYNTAX_COMMAND));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SYNTAX_COMMAND));
         } else if (args.length <= 5) {
 
             switch (args[0]) {
@@ -66,12 +66,12 @@ public class CommandWorlds extends CommandManager {
                     worldsGameRuleCommand(sender, args); // TODO: Add config settings, that is only 'gamerule'
                     break;
                 default:
-                    sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SYNTAX_COMMAND));
+                    sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SYNTAX_COMMAND));
                     break;
             }
 
         } else {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SYNTAX_COMMAND));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SYNTAX_COMMAND));
         }
         return true;
     }
@@ -102,7 +102,7 @@ public class CommandWorlds extends CommandManager {
 
         if (args.length == 2 && !args[0].equalsIgnoreCase("gamerule")) {
             String lastWord = args[args.length - 1];
-            for (String world : getWorldManager().getWorldList()) {
+            for (String world : worldManager.getWorldID().getListID()) {
                 if (StringUtil.startsWithIgnoreCase(world, lastWord))
                     tabComplete.add(world);
                 tabComplete.sort(String.CASE_INSENSITIVE_ORDER);
@@ -111,7 +111,7 @@ public class CommandWorlds extends CommandManager {
 
         if (args.length == 3 && args[0].equalsIgnoreCase("gamerule")) {
             String lastWord = args[args.length - 1];
-            for (String world : getWorldManager().getWorldList()) {
+            for (String world : worldManager.getWorldID().getListID()) {
                 if (StringUtil.startsWithIgnoreCase(world, lastWord))
                     tabComplete.add(world);
                 tabComplete.sort(String.CASE_INSENSITIVE_ORDER);
@@ -141,58 +141,58 @@ public class CommandWorlds extends CommandManager {
     }
 
     private void worldsCreateCommand(CommandSender sender, String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_CREATE))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_CREATE))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_CREATE)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_CREATE)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return;
         }
 
         String worldName = args[1];
 
         if (sender.getServer().getWorld(worldName) != null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DOES_EXIST).replace("[WORLD]", worldName));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_DOES_EXIST).replace("[WORLD]", worldName));
             return;
         }
 
         String worldEnvironment = args[2];
         switch (worldEnvironment) {
             case "normal":
-                getWorldManager().createWorld(worldName, World.Environment.NORMAL);
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
+                worldManager.createWorld(worldName, World.Environment.NORMAL);
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
                 break;
             case "nether":
-                getWorldManager().createWorld(worldName, World.Environment.NETHER);
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
+                worldManager.createWorld(worldName, World.Environment.NETHER);
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
                 break;
             case "end":
-                getWorldManager().createWorld(worldName, World.Environment.THE_END);
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
+                worldManager.createWorld(worldName, World.Environment.THE_END);
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
                 break;
             default:
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SYNTAX_CREATE));
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SYNTAX_CREATE));
                 break;
         }
     }
 
     private void worldsDeleteCommand(CommandSender sender, String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_DELETE))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_DELETE))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_DELETE)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_DELETE)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return;
         }
 
         World world = sender.getServer().getWorld(args[1]);
 
         if (world == null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[1]));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[1]));
             return;
         }
 
@@ -200,103 +200,103 @@ public class CommandWorlds extends CommandManager {
 
         if (player != null)
             if (player.getWorld().equals(world))
-                player.kick(Component.text(getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DELETE_KICKED_PLAYER)));
+                player.kick(Component.text(message.getString(Messages.COMMAND_WORLDS_DELETE_KICKED_PLAYER)));
 
-        getWorldManager().deleteWorld(world.getName());
-        sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SUCCESSFUL_DELETE).replace("[WORLD]", world.getName()));
+        worldManager.deleteWorld(world.getName());
+        sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SUCCESSFUL_DELETE).replace("[WORLD]", world.getName()));
     }
 
     private void worldsTeleportCommand(CommandSender sender, String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_TELEPORT))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_TELEPORT))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_TELEPORT)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_TELEPORT)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return;
         }
 
         World world = sender.getServer().getWorld(args[1]);
 
         if (world == null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[1]));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[1]));
             return;
         }
 
         Player player = sender instanceof Player ? (Player) sender : null;
 
         if (player == null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMAND_NO_CONSOLE));
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_CONSOLE));
             return;
         }
 
         player.teleport(world.getSpawnLocation());
-        sendMessage(player, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_TELEPORT).replace("[WORLD]", world.getName()));
+        sendMessage(player, message.getString(Messages.COMMAND_WORLDS_TELEPORT).replace("[WORLD]", world.getName()));
     }
 
     private void worldsImportCommand(CommandSender sender, String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_IMPORT))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_IMPORT))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_IMPORT)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_IMPORT)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return;
         }
 
         String worldName = args[1];
 
         if (sender.getServer().getWorld(worldName) != null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DOES_EXIST).replace("[WORLD]", worldName));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_DOES_EXIST).replace("[WORLD]", worldName));
             return;
         }
 
-        getWorldManager().importWorld(worldName);
-        sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
+        worldManager.importWorld(worldName);
+        sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SUCCESSFUL_CREATE).replace("[WORLD]", worldName));
     }
 
     @SuppressWarnings("deprecation")
     private void worldsGameRuleCommand(CommandSender sender, String[] args) {
-        if (!(getConfig().isConfigValue(Configs.COMMANDS_WORLDS_GAMERULE))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_DISABLE));
+        if (!(config.getBoolean(Configs.COMMAND_WORLDS_GAMERULE))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_DISABLE));
             return;
         }
 
-        if (!(sender.hasPermission(getPermission().getConfigPermission(Permissions.COMMANDS_WORLDS_GAMERULE)))) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_NO_PERMISSION));
+        if (!(sender.hasPermission(config.getString(Configs.PERMISSION_WORLDS_GAMERULE)))) {
+            sendMessage(sender, message.getString(Messages.COMMAND_NO_PERMISSION));
             return;
         }
 
         World world = sender.getServer().getWorld(args[2]);
 
         if (world == null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[2]));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_DOES_NOT_EXIST).replace("[WORLD]", args[2]));
             return;
         }
 
         GameRule<?> gameRule = GameRule.getByName(args[3]);
 
         if (gameRule == null) {
-            sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_GAMERULE_WRONG_GAMERULE).replace("[GAMERULE]", args[3]));
+            sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_GAMERULE_WRONG_GAMERULE).replace("[GAMERULE]", args[3]));
             return;
         }
         String path = String.format("Worlds.World.%s.GameRules.%s", world.getName(), gameRule.getName());
 
         switch (args[1]) {
             case "get":
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_GAMERULE_GET).replace("[GAMERULE]", gameRule.getName()).replace("[VALUE]", getWorldManager().getConfigPath(path)));
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_GAMERULE_GET).replace("[GAMERULE]", gameRule.getName()).replace("[VALUE]", worldManager.getString(path)));
                 break;
             case "set":
                 Object value = args[4];
-                getWorldManager().setConfigValue(path, value);
-                getWorldManager().saveConfig();
+                worldManager.set(path, value);
+                worldManager.save();
                 world.setGameRuleValue(gameRule.getName(), value.toString()); // deprecated Method
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_GAMERULE_SET).replace("[GAMERULE]", gameRule.getName()).replace("[VALUE]", value.toString()));
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_GAMERULE_SET).replace("[GAMERULE]", gameRule.getName()).replace("[VALUE]", value.toString()));
                 break;
             default:
-                sendMessage(sender, getMessage().getConfigMessage(Messages.COMMANDS_WORLDS_SYNTAX_GAMERULE));
+                sendMessage(sender, message.getString(Messages.COMMAND_WORLDS_SYNTAX_GAMERULE));
                 break;
         }
 
