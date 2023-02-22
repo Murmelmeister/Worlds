@@ -3,7 +3,7 @@ version: '${project.version}'
 main: de.murmelmeister.worlds.Worlds
 api-version: 1.19
 authors: [ Murmelmeister ]
-description: A world system for Minecraft servers.
+description: A world system for minecraft servers.
 website: https://www.youtube.com/Murmelmeister
 
 commands:

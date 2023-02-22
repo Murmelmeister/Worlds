@@ -1,7 +1,18 @@
-package de.murmelmeister.worlds.api;
+package de.murmelmeister.worlds.api.config;
+
+import de.murmelmeister.worlds.InitPlugin;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class PlayerManager {
-/*
+
     private InitPlugin init;
 
     private File folder;
@@ -126,5 +137,5 @@ public class PlayerManager {
 
     public void setConfig(YamlConfiguration config) {
         this.config = config;
-    }*/
+    }
 }

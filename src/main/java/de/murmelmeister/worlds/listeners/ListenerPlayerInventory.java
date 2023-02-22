@@ -1,13 +1,13 @@
-package de.murmelmeister.worlds.listener.listeners;
+package de.murmelmeister.worlds.listeners;
 
-import de.murmelmeister.worlds.Main;
-import de.murmelmeister.worlds.listener.Listeners;
+import de.murmelmeister.worlds.InitPlugin;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerInventoryListener extends Listeners {
-    public PlayerInventoryListener(Main main) {
-        super(main);
-    }
-/*
+public class ListenerPlayerInventory extends Listeners {
+
     public ListenerPlayerInventory(InitPlugin init) {
         super(init);
     }
@@ -22,5 +22,5 @@ public class PlayerInventoryListener extends Listeners {
     public void handlePlayerQuit(PlayerQuitEvent event) {
         getInit().getPlayerManager().saveInventory(event.getPlayer().getUniqueId());
     }
-*/
+
 }

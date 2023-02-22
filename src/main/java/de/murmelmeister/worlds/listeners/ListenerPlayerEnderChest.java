@@ -1,13 +1,14 @@
-package de.murmelmeister.worlds.listener.listeners;
+package de.murmelmeister.worlds.listeners;
 
-import de.murmelmeister.worlds.Main;
-import de.murmelmeister.worlds.listener.Listeners;
+import de.murmelmeister.worlds.InitPlugin;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 
-public class PlayerEnderChestListener extends Listeners {
-    public PlayerEnderChestListener(Main main) {
-        super(main);
-    }
-/*
+public class ListenerPlayerEnderChest extends Listeners {
+
     public ListenerPlayerEnderChest(InitPlugin init) {
         super(init);
     }
@@ -23,5 +24,5 @@ public class PlayerEnderChestListener extends Listeners {
         if (event.getPlayer().getInventory().getType() == InventoryType.ENDER_CHEST) return;
         getInit().getPlayerManager().saveEnderChest(event.getPlayer().getUniqueId());
     }
-*/
+
 }
