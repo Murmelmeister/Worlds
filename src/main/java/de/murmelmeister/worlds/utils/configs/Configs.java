@@ -1,35 +1,30 @@
 package de.murmelmeister.worlds.utils.configs;
 
 public enum Configs {
+    PREFIX_ENABLED("Prefix.Enabled", true),
+    COMMAND_ENABLE_WORLDS_COMMAND("Commands.Enable.Worlds.Command", true),
+    COMMAND_ENABLE_WORLDS_CREATE("Commands.Enable.Worlds.Create", true),
+    COMMAND_ENABLE_WORLDS_DELETE("Commands.Enable.Worlds.Delete", true),
+    COMMAND_ENABLE_WORLDS_TELEPORT("Commands.Enable.Worlds.Teleport", true),
+    COMMAND_ENABLE_WORLDS_IMPORT("Commands.Enable.Worlds.Import", true),
+    COMMAND_ENABLE_WORLDS_GAMERULE("Commands.Enable.Worlds.GameRule", true),
+    SAVING_PLAYER_INVENTORY("Saving.PlayerInventory", true),
+    SAVING_PLAYER_ENDER_CHEST("Saving.PlayerEnderChest", true);
+    public static final Configs[] VALUES = values();
 
-    COMMANDS_WORLDS_COMMAND("Commands.Worlds.Command", true),
-    COMMANDS_WORLDS_CREATE("Commands.Worlds.Create", true),
-    COMMANDS_WORLDS_DELETE("Commands.Worlds.Delete", true),
-    COMMANDS_WORLDS_TELEPORT("Commands.Worlds.Teleport", true),
-    COMMANDS_WORLDS_IMPORT("Commands.Worlds.Import", true),
-    COMMANDS_WORLDS_GAMERULE("Commands.Worlds.GameRule", true);
+    private final String path;
+    private final Object value;
 
-    private String path;
-    private Object value;
-
-    Configs(String path, Object value) {
-        setPath(path);
-        setValue(value);
+    Configs(final String path, final Object value) {
+        this.path = path;
+        this.value = value;
     }
 
     public String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public Object getValue() {
         return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 }

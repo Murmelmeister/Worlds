@@ -1,30 +1,26 @@
 package de.murmelmeister.worlds.listeners;
 
-import de.murmelmeister.worlds.InitPlugin;
+import de.murmelmeister.worlds.Worlds;
+import de.murmelmeister.worlds.api.config.PlayerManager;
+import de.murmelmeister.worlds.files.ConfigFile;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 
-public class Listeners implements Listener {
+public abstract class Listeners implements Listener {
+    protected final ConfigFile config;
+    protected final PlayerManager playerManager;
 
-    private InitPlugin init;
-
-    public Listeners(InitPlugin init) {
-        setInit(init);
+    public Listeners(Worlds plugin) {
+        this.config = plugin.getConfigFile();
+        this.playerManager = plugin.getPlayerManager();
     }
 
-    public void registerListeners() {
-        setListener(new ListenerPlayerInventory(getInit()));
-        setListener(new ListenerPlayerEnderChest(getInit()));
+    public static void register(Worlds plugin) {
+        addListener(plugin, new PlayerInventoryListener(plugin));
+        addListener(plugin, new PlayerEnderChestListener(plugin));
     }
 
-    private void setListener(Listener listener) {
-        getInit().getInstance().getServer().getPluginManager().registerEvents(listener, getInit().getInstance());
-    }
-
-    public InitPlugin getInit() {
-        return init;
-    }
-
-    public void setInit(InitPlugin init) {
-        this.init = init;
+    private static void addListener(Plugin plugin, Listener listener) {
+        plugin.getServer().getPluginManager().registerEvents(listener, plugin);
     }
 }

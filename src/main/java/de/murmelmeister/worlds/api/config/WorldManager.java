@@ -1,238 +1,175 @@
 package de.murmelmeister.worlds.api.config;
 
-import de.murmelmeister.worlds.InitPlugin;
+import de.murmelmeister.worlds.Worlds;
+import de.murmelmeister.worlds.utils.FileUtil;
 import org.bukkit.GameRule;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorldManager {
+public final class WorldManager {
+    private final Logger logger;
+    private final Server server;
 
-    private InitPlugin init;
-
-    private File folder;
     private File file;
     private YamlConfiguration config;
-
     private List<String> worldList;
-    private World world;
 
-    public WorldManager(InitPlugin init) {
-        setInit(init);
-        setWorldList(new ArrayList<>());
-        createConfig();
-        saveConfig();
+    public WorldManager(Logger logger, Server server) {
+        this.logger = logger;
+        this.server = server;
+        createFile();
     }
 
-    public void createConfig() {
-        String fileName = "worlds.yml";
-        setFolder(new File(String.format("plugins//%s//", getInit().getInstance().getPluginName())));
-        if (!(getFolder().exists())) {
-            boolean aBoolean = getFolder().mkdir();
-            if (!(aBoolean))
-                getInit().getInstance().getSLF4JLogger().warn("The plugin can not create a second folder.");
-        }
-        setFile(new File(getFolder(), fileName));
-        if (!(getFile().exists())) {
-            try {
-                boolean aBoolean = getFile().createNewFile();
-                if (!(aBoolean))
-                    getInit().getInstance().getSLF4JLogger().warn(String.format("The plugin can not create the file '%s'.", fileName));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        setConfig(YamlConfiguration.loadConfiguration(getFile()));
+    public void createFile() {
+        this.file = FileUtil.createFile(logger, Worlds.getMainPath(), "worlds.yml");
+        this.config = YamlConfiguration.loadConfiguration(file);
     }
 
-    public void saveConfig() {
+    public void saveFile() {
         try {
-            getConfig().save(getFile());
+            this.config.save(file);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error("Error while saving config file", e);
         }
     }
 
     public void loadDefaultWorlds() {
-        for (World worlds : getInit().getInstance().getServer().getWorlds()) {
-            if (getConfigPath("Worlds.World." + worlds.getName()) != null) return;
-            setWorld(worlds);
+        for (World worlds : server.getWorlds()) {
+            if (config.getString("Worlds." + worlds.getName()) != null) return;
             setWorldOptions(worlds.getName());
-            this.getWorldList().add(getWorld().getName());
-            updateWorldList(this.getWorldList());
-            saveConfig();
+            worldList = getWorldList();
+            worldList.add(worlds.getName());
+            config.set("WorldList", worldList);
+            saveFile();
         }
     }
 
-    public void createWorld(String worldName) {
-        if (getInit().getInstance().getServer().getWorld(worldName) != null)
+    private void createWorld(String worldName) {
+        if (server.getWorld(worldName) != null)
             return;
         WorldCreator worldCreator = new WorldCreator(worldName);
-        setWorld(worldCreator.createWorld());
+        worldCreator.createWorld();
         setWorldOptions(worldName);
-        saveConfig();
+        saveFile();
     }
 
     public void createWorld(String worldName, World.Environment environment) {
-        if (getInit().getInstance().getServer().getWorld(worldName) != null)
-            loadWorld(worldName, environment);
+        if (server.getWorld(worldName) != null)
+            loadWorld(worldName);
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
-        setWorld(worldCreator.createWorld()); // TODO: If environment is "normal" then send the console a chunks error <- but I don't know why
+        worldCreator.createWorld(); // TODO: If environment is "normal" then send the console a chunks error <- but I don't know why
         setWorldOptions(worldName);
-        this.getWorldList().add(getWorld().getName());
-        updateWorldList(this.getWorldList());
-        saveConfig();
+        worldList = getWorldList();
+        worldList.add(worldName);
+        config.set("WorldList", worldList);
+        saveFile();
     }
 
     public void deleteWorld(String worldName) {
-        setWorld(getInit().getInstance().getServer().getWorld(worldName));
-        File worldFile = getWorld().getWorldFolder();
-        getInit().getInstance().getServer().unloadWorld(getWorld(), false);
-        deleteFile(worldFile);
-        this.getWorldList().remove(getWorld().getName());
-        updateWorldList(this.getWorldList());
-        setConfigValue("Worlds.World." + worldName, null);
-        this.saveConfig();
+        World world = server.getWorld(worldName);
+        if (world == null) return;
+        File worldFile = world.getWorldFolder();
+        server.unloadWorld(world, false);
+        boolean success = deleteFile(worldFile);
+        if (!success) logger.error("Could not delete the world folder.");
+        worldList.remove(world.getName());
+        config.set("WorldList", worldList);
+        config.set("Worlds." + worldName, null);
+        saveFile();
     }
 
-    private boolean deleteFile(File file) { // I don't know if it needs a boolean
-        if (file.exists()) {
-            File[] files = file.listFiles();
-            if (files == null) return false;
-            // I don't know if it needs for-loop
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteFile(files[i]);
-                } else {
-                    boolean aBoolean = files[i].delete();
-                    if (!(aBoolean)) getInit().getInstance().getSLF4JLogger().warn("Could not delete the same files.");
-                }
+    private boolean deleteFile(File file) {
+        if (!file.exists()) return false;
+
+        File[] files = file.listFiles();
+        if (files != null) {
+            for (File value : files) {
+                if (value.isDirectory()) deleteFile(value);
+                else if (!value.delete()) logger.error("Could not delete file: {}", value.getAbsolutePath());
             }
         }
         return file.delete();
     }
 
     public void importWorld(String worldName) {
-        if (getInit().getInstance().getServer().getWorld(worldName) == null)
-            createWorld(worldName);
-        setWorld(getInit().getInstance().getServer().getWorld(worldName));
+        WorldCreator worldCreator = new WorldCreator(worldName);
+        server.createWorld(worldCreator);
         setWorldOptions(worldName);
-        if (!(this.getWorldList().contains(getWorld().getName()))) {
-            this.getWorldList().add(getWorld().getName());
-            updateWorldList(this.getWorldList());
+        this.worldList = getWorldList();
+        if (!(worldList.contains(worldName))) {
+            worldList.add(worldName);
+            config.set("WorldList", worldList);
         }
-        saveConfig();
+        saveFile();
     }
 
-    public void loadWorld(String worldName, World.Environment environment) {
-        if (getInit().getInstance().getServer().getWorld(worldName) == null)
-            createWorld(worldName, environment);
-        setWorld(getInit().getInstance().getServer().getWorld(worldName));
+    public void loadWorld(String worldName) {
+        if (server.getWorld(worldName) == null) return;
         setWorldOptions(worldName);
-        if (!(this.getWorldList().contains(getWorld().getName())))
-            this.getWorldList().add(getWorld().getName());
-        saveConfig();
+        worldList = getWorldList();
+        if (!(worldList.contains(worldName)))
+            worldList.add(worldName);
+        saveFile();
     }
 
-    public void unloadWorld(String worldName, World.Environment environment) {
-        if (getInit().getInstance().getServer().getWorld(worldName) == null)
-            createWorld(worldName, environment);
-        setWorld(getInit().getInstance().getServer().getWorld(worldName));
+    public void unloadWorld(String worldName) {
+        if (server.getWorld(worldName) == null) return;
         setWorldOptions(worldName);
-        this.getWorldList().remove(getConfig().getName());
+        worldList.remove(worldName);
+        saveFile();
     }
 
     private void setWorldOptions(String worldName) {
-        String path = "Worlds.World." + worldName;
-        setWorldOption(path + ".Name", getWorld().getName());
-        setWorldOption(path + ".Environment", getWorld().getEnvironment().name());
-        setWorldOption(path + ".AllowAnimals", getWorld().getAllowAnimals());
-        setWorldOption(path + ".AllowMonsters", getWorld().getAllowMonsters());
-        setWorldOption(path + ".Difficulty", getWorld().getDifficulty().name());
-        setWorldOption(path + ".PVP", getWorld().getPVP());
+        World world = server.getWorld(worldName);
+        if (world == null) return;
+        String path = "Worlds." + worldName;
+        setWorldOption(path + ".Name", world.getName());
+        setWorldOption(path + ".Environment", world.getEnvironment().name());
+        setWorldOption(path + ".AllowAnimals", world.getAllowAnimals());
+        setWorldOption(path + ".AllowMonsters", world.getAllowMonsters());
+        setWorldOption(path + ".Difficulty", world.getDifficulty().name());
+        setWorldOption(path + ".PvP", world.getPVP());
         for (GameRule<?> gameRule : GameRule.values())
-            setWorldOption(path + ".GameRules." + gameRule.getName(), getWorld().getGameRuleValue(gameRule));
-        saveConfig();
+            setWorldOption(path + ".GameRules." + gameRule.getName(), world.getGameRuleValue(gameRule));
+        saveFile();
     }
 
     private void setWorldOption(String path, Object value) {
-        if (getConfigPath(path) == null) setConfigValue(path, value);
+        if (config.getString(path) == null) config.set(path, value);
     }
 
     public void loadWorlds() {
-        for (String worldName : getConfig().getStringList("Worlds.List"))
-            loadWorld(worldName, World.Environment.NORMAL);
+        for (String worldName : config.getStringList("WorldList"))
+            loadWorld(worldName);
     }
 
     public void unloadWorlds() {
-        for (String worldName : getConfig().getStringList("Worlds.List"))
-            unloadWorld(worldName, World.Environment.NORMAL);
-    }
-
-    private void updateWorldList(List<String> worldList) {
-        String path = "Worlds.List";
-        setConfigValue(path, worldList);
-    }
-
-    public void setConfigValue(String path, Object value) {
-        getConfig().set(path, value);
-    }
-
-    public String getConfigPath(String path) {
-        return getConfig().getString(path);
-    }
-
-    public InitPlugin getInit() {
-        return init;
-    }
-
-    public void setInit(InitPlugin init) {
-        this.init = init;
-    }
-
-    public File getFolder() {
-        return folder;
-    }
-
-    public void setFolder(File folder) {
-        this.folder = folder;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
-    }
-
-    public YamlConfiguration getConfig() {
-        return config;
-    }
-
-    public void setConfig(YamlConfiguration config) {
-        this.config = config;
+        for (String worldName : config.getStringList("WorldList"))
+            unloadWorld(worldName);
     }
 
     public List<String> getWorldList() {
+        createFile();
+        List<String> worldList = new ArrayList<>();
+        if (config.contains("WorldList")) worldList = config.getStringList("WorldList");
         return worldList;
     }
 
-    public void setWorldList(List<String> worldList) {
-        this.worldList = worldList;
+    public void set(String path, Object value) {
+        config.set(path, value);
+        saveFile();
     }
 
-    public World getWorld() {
-        return world;
-    }
-
-    public void setWorld(World world) {
-        this.world = world;
+    public String getSting(String path) {
+        return config.getString(path);
     }
 }
